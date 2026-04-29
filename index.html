@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora descens Nàstic J35</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    background: #f2f2f2;
+    padding: 32px 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .subtitol {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    color: #666;
+    margin-bottom: 16px;
+  }
+
+  .page-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .content-wrap {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .toolbar {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-esborrar {
+    padding: 6px 16px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #555;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .btn-esborrar:hover { background: #f0f0f0; border-color: #999; color: #333; }
+  .btn-esborrar:active { background: #e4e4e4; }
+
+  /* CONTENIDOR SCROLLABLE PER A MÒBIL */
+  .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table.calc {
+    border-collapse: collapse;
+    width: auto;
+    min-width: 700px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    font-family: Arial, sans-serif;
+  }
+
+  table.calc th, table.calc td {
+    border: 1px solid #bbb;
+    padding: 9px 12px;
+    vertical-align: middle;
+  }
+
+  .th-empty { background: #e8e8e8; width: 52px; }
+
+  .th-team {
+    background: #e8e8e8;
+    text-align: center;
+    min-width: 260px;
+  }
+
+  .th-team .team-label { font-weight: bold; font-size: 14px; color: #111; }
+  .th-team .team-label.nastic { color: #b00000; }
+  .th-team .team-pts { font-weight: normal; color: #555; font-size: 12px; margin-top: 2px; }
+
+  .th-pts-col {
+    background: #e8e8e8;
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+    width: 40px;
+    color: #444;
+  }
+
+  .td-jornada {
+    background: #e8e8e8;
+    font-weight: bold;
+    text-align: center;
+    font-size: 13px;
+    color: #333;
+    width: 52px;
+  }
+
+  .td-rival { padding: 7px 12px; min-width: 260px; }
+
+  .rival-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  .rival-name { flex: 1; font-size: 13px; color: #333; }
+
+  .btns { display: flex; gap: 4px; flex-shrink: 0; }
+
+  .btn-res {
+    width: 27px;
+    height: 27px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #f5f5f5;
+    color: #555;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+    line-height: 1;
+  }
+
+  .btn-res:hover:not(.active-v):not(.active-e):not(.active-d) { background: #e0e0e0; }
+  .btn-res.active-v { background: #1e6b1e; color: #fff; border-color: #1e6b1e; }
+  .btn-res.active-e { background: #b08000; color: #fff; border-color: #b08000; }
+  .btn-res.active-d { background: #a81c1c; color: #fff; border-color: #a81c1c; }
+
+  .td-pts {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    width: 40px;
+    color: #ccc;
+  }
+
+  .td-pts.v { color: #1e6b1e; }
+  .td-pts.e { color: #b08000; }
+  .td-pts.d { color: #a81c1c; }
+
+  /* FILA TOTAL */
+  .tr-total td {
+    background: #e8e8e8;
+    border-top: 2px solid #999;
+  }
+
+  .td-total-label {
+    text-align: right;
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+    padding-right: 10px;
+    vertical-align: middle;
+  }
+
+  .td-total-num {
+    text-align: center;
+    width: 40px;
+    vertical-align: middle;
+  }
+
+  .total-num {
+    font-size: 22px;
+    font-weight: bold;
+    color: #222;
+    display: block;
+  }
+
+  .total-num.descens { color: #a81c1c; }
+
+  .aux-msg {
+    display: none;
+    font-size: 11px;
+    font-weight: bold;
+    font-style: normal;
+    margin-top: 4px;
+  }
+
+  .aux-msg.vermell { color: #a81c1c; }
+  .aux-msg.taronja { color: #c06000; }
+
+  /* TEXT INFORMATIU + TAULA LIGUILLA */
+  .info-section {
+    margin-top: 22px;
+    font-family: Arial, sans-serif;
+  }
+
+  .info-text {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .liguilla-title {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 18px;
+    margin-bottom: 8px;
+  }
+
+  .liguilla-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table.liguilla {
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    background: #fff;
+  }
+
+  table.liguilla th {
+    background: #e8e8e8;
+    border: 1px solid #bbb;
+    padding: 5px 10px;
+    text-align: center;
+    font-weight: bold;
+    color: #444;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  table.liguilla th:first-child {
+    text-align: left;
+    min-width: 150px;
+  }
+
+  table.liguilla td {
+    border: 1px solid #bbb;
+    padding: 5px 10px;
+    text-align: center;
+    color: #333;
+    white-space: nowrap;
+  }
+
+  table.liguilla td:first-child {
+    text-align: left;
+    font-weight: bold;
+  }
+
+  table.liguilla tr:nth-child(odd) td {
+    background: #fafafa;
+  }
+
+  /* ─── MÒBIL ────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    body {
+      padding: 16px 10px;
+    }
+
+    h1 {
+      font-size: 15px;
+    }
+
+    .subtitol {
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    .scroll-hint {
+      display: block;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+
+    table.calc {
+      min-width: 620px;
+    }
+
+    table.calc th, table.calc td {
+      padding: 7px 8px;
+    }
+
+    .th-team {
+      min-width: 200px;
+    }
+
+    .th-team .team-label { font-size: 12px; }
+    .th-team .team-pts { font-size: 11px; }
+
+    .td-rival {
+      padding: 6px 8px;
+      min-width: 200px;
+    }
+
+    .rival-inner {
+      gap: 6px;
+    }
+
+    .rival-name { font-size: 12px; }
+
+    .btn-res {
+      width: 30px;
+      height: 30px;
+      font-size: 12px;
+    }
+
+    .btns { gap: 5px; }
+
+    .td-pts { font-size: 14px; }
+
+    .total-num { font-size: 20px; }
+
+    .td-total-label { font-size: 11px; }
+
+    .aux-msg { font-size: 10px; }
+
+    .info-text { font-size: 11px; }
+
+    table.liguilla { font-size: 11px; }
+    table.liguilla th { font-size: 10px; padding: 4px 7px; }
+    table.liguilla td { padding: 4px 7px; }
+    table.liguilla th:first-child { min-width: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Simulador J35–J38 v4 - Escenaris de descens a 2aRFEF</h1>
+<p class="subtitol">Siusplau, omple tots els resultats per obtenir els possibles escenaris</p>
+
+<div class="page-wrap">
+<div class="content-wrap">
+
+<div class="toolbar">
+  <button class="btn-esborrar" onclick="esborrarTot()">Esborrar</button>
+</div>
+
+<span class="scroll-hint" style="display:none;">Llisca horitzontalment per veure tota la taula →</span>
+
+<div class="table-scroll">
+<table class="calc">
+  <thead>
+    <tr>
+      <th class="th-empty"></th>
+      <th class="th-team">
+        <div class="team-label">14è SD Tarazona</div>
+        <div class="team-pts">41 pts actuals</div>
+      </th>
+      <th class="th-pts-col">Pts</th>
+      <th class="th-team">
+        <div class="team-label">15è Juv. Torremolinos</div>
+        <div class="team-pts">40 pts actuals</div>
+      </th>
+      <th class="th-pts-col">Pts</th>
+      <th class="th-team">
+        <div class="team-label nastic">16è Nàstic</div>
+        <div class="team-pts">40 pts actuals</div>
+      </th>
+      <th class="th-pts-col">Pts</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+  <tfoot>
+    <tr class="tr-total">
+      <td class="td-jornada"></td>
+      <td class="td-total-label">
+        Puntuació final
+        <div id="aux-msg-0" class="aux-msg"></div>
+      </td>
+      <td class="td-total-num">
+        <span id="total-0" class="total-num">41</span>
+      </td>
+      <td class="td-total-label">
+        Puntuació final
+        <div id="aux-msg-1" class="aux-msg"></div>
+      </td>
+      <td class="td-total-num">
+        <span id="total-1" class="total-num">40</span>
+      </td>
+      <td class="td-total-label">
+        Puntuació final
+        <div id="aux-msg-2" class="aux-msg"></div>
+      </td>
+      <td class="td-total-num">
+        <span id="total-2" class="total-num">40</span>
+      </td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+<div class="info-section">
+  <div class="info-text">
+    Criteris en cas d'empat a punts en la classificació final, entre dos equips:<br>
+    1) Gol average dels enfrontaments directes entre els dos equips<br>
+    2) Gol average global a la lliga<br>
+    3) Major nombre gols a favor<br>
+    <br>
+    Criteris en cas d'empat a punts en la classificació final, entre tres equips o més:<br>
+    1) Liguilla entre els equips
+  </div>
+
+  <div class="liguilla-title">Liguilla - Estat actual post-J34</div>
+  <div class="liguilla-scroll">
+  <table class="liguilla">
+    <thead>
+      <tr>
+        <th>Equip</th>
+        <th>PTS</th>
+        <th>PJ</th>
+        <th>PG</th>
+        <th>PE</th>
+        <th>PP</th>
+        <th>GF</th>
+        <th>GC</th>
+        <th>DG</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Juv. Torremolinos</td>
+        <td>7</td>
+        <td>4</td>
+        <td>2</td>
+        <td>1</td>
+        <td>1</td>
+        <td>4</td>
+        <td>3</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>Nàstic Tarragona</td>
+        <td>6</td>
+        <td>3</td>
+        <td>2</td>
+        <td>0</td>
+        <td>1</td>
+        <td>4</td>
+        <td>3</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>SD Tarazona</td>
+        <td>1</td>
+        <td>3</td>
+        <td>0</td>
+        <td>1</td>
+        <td>2</td>
+        <td>2</td>
+        <td>4</td>
+        <td>-2</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+  var TEAMS = [
+    { pts: 41 },
+    { pts: 40 },
+    { pts: 40 }
+  ];
+
+  var JORNADES = [
+    { j: "J35", rivals: ["11è CD Teruel (Fora)", "3r Atlético B (Casa)", "20è Sevilla Atlético (Casa)"] },
+    { j: "J36", rivals: ["16è Nàstic (Casa)", "18è Marbella FC (Fora)", "14è SD Tarazona (Fora)"] },
+    { j: "J37", rivals: ["17è Betis Deportivo (Fora)", "12è Real Murcia (Casa)", "5è CE Europa (Casa)"] },
+    { j: "J38", rivals: ["1r CE Sabadell (Casa)", "9è Antequera CF (Fora)", "10è Hércules CF (Fora)"] }
+  ];
+
+  var BTNS = [
+    { val: 3, label: "V", btnCls: "active-v", ptsCls: "v" },
+    { val: 1, label: "E", btnCls: "active-e", ptsCls: "e" },
+    { val: 0, label: "D", btnCls: "active-d", ptsCls: "d" }
+  ];
+
+  var sel = TEAMS.map(function() { return JORNADES.map(function() { return null; }); });
+
+  /* Mostrar avís de scroll en mòbil */
+  if (window.innerWidth <= 768) {
+    var hint = document.querySelector(".scroll-hint");
+    if (hint) hint.style.display = "block";
+  }
+
+  function buildTable() {
+    var tbody = document.getElementById("tbody");
+    JORNADES.forEach(function(jornada, ji) {
+      var tr = document.createElement("tr");
+
+      var tdJ = document.createElement("td");
+      tdJ.className = "td-jornada";
+      tdJ.textContent = jornada.j;
+      tr.appendChild(tdJ);
+
+      TEAMS.forEach(function(team, ti) {
+        var tdRival = document.createElement("td");
+        tdRival.className = "td-rival";
+
+        var inner = document.createElement("div");
+        inner.className = "rival-inner";
+
+        var rivalName = document.createElement("span");
+        rivalName.className = "rival-name";
+        rivalName.textContent = jornada.rivals[ti];
+        inner.appendChild(rivalName);
+
+        var btnsDiv = document.createElement("div");
+        btnsDiv.className = "btns";
+
+        BTNS.forEach(function(b) {
+          var btn = document.createElement("button");
+          btn.className = "btn-res";
+          btn.textContent = b.label;
+          btn.addEventListener("click", function() {
+            sel[ti][ji] = (sel[ti][ji] === b.val) ? null : b.val;
+            updateAll();
+          });
+          btnsDiv.appendChild(btn);
+        });
+
+        inner.appendChild(btnsDiv);
+        tdRival.appendChild(inner);
+        tr.appendChild(tdRival);
+
+        var tdPts = document.createElement("td");
+        tdPts.className = "td-pts";
+        tdPts.id = "pts-" + ti + "-" + ji;
+        tdPts.textContent = "·";
+        tr.appendChild(tdPts);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function allFilled() {
+    for (var ti = 0; ti < TEAMS.length; ti++) {
+      for (var ji = 0; ji < JORNADES.length; ji++) {
+        if (sel[ti][ji] === null) return false;
+      }
+    }
+    return true;
+  }
+
+  function resetTotals(totals) {
+    TEAMS.forEach(function(team, ti) {
+      var totalEl = document.getElementById("total-" + ti);
+      var auxEl   = document.getElementById("aux-msg-" + ti);
+
+      totalEl.textContent = totals[ti];
+      totalEl.className   = "total-num";
+      auxEl.textContent   = "";
+      auxEl.className     = "aux-msg";
+      auxEl.style.display = "none";
+    });
+  }
+
+  function setAuxMsg(ti, text, color) {
+    var el = document.getElementById("aux-msg-" + ti);
+    el.textContent   = text;
+    el.className     = "aux-msg " + color;
+    el.style.display = "block";
+  }
+
+  function updateAll() {
+    var rows = document.getElementById("tbody").rows;
+
+    TEAMS.forEach(function(team, ti) {
+      JORNADES.forEach(function(jornada, ji) {
+        var v = sel[ti][ji];
+        var rivalCell = rows[ji].cells[1 + ti * 2];
+
+        rivalCell.querySelectorAll(".btn-res").forEach(function(btn, bi) {
+          btn.classList.remove("active-v", "active-e", "active-d");
+          if (v !== null && BTNS[bi].val === v) btn.classList.add(BTNS[bi].btnCls);
+        });
+
+        var ptsCell = document.getElementById("pts-" + ti + "-" + ji);
+        if (v === null) {
+          ptsCell.textContent = "·";
+          ptsCell.className   = "td-pts";
+        } else {
+          var b = BTNS.find(function(b) { return b.val === v; });
+          ptsCell.textContent = v;
+          ptsCell.className   = "td-pts " + b.ptsCls;
+        }
+      });
+    });
+
+    var totals = TEAMS.map(function(team, ti) {
+      return team.pts + sel[ti].reduce(function(acc, v) { return acc + (v !== null ? v : 0); }, 0);
+    });
+
+    resetTotals(totals);
+
+    if (!allFilled()) return;
+
+    var minPts   = Math.min.apply(null, totals);
+    var minCount = totals.filter(function(v) { return v === minPts; }).length;
+
+    if (minCount === 3) {
+      document.getElementById("total-0").className = "total-num descens";
+      setAuxMsg(0, "Descens per liguilla de triple empat", "vermell");
+
+    } else if (minCount === 1) {
+      var lowestIdx = totals.indexOf(minPts);
+      document.getElementById("total-" + lowestIdx).className = "total-num descens";
+      setAuxMsg(lowestIdx, "Descens", "vermell");
+
+    } else if (minCount === 2) {
+      var aboveIdx = -1;
+      for (var i = 0; i < totals.length; i++) {
+        if (totals[i] !== minPts) { aboveIdx = i; break; }
+      }
+
+      if (aboveIdx === 0) {
+        setAuxMsg(1, "Pendents de Gol Average Global final a lliga", "taronja");
+        setAuxMsg(2, "Pendents de Gol Average Global final a lliga", "taronja");
+
+      } else if (aboveIdx === 1) {
+        setAuxMsg(0, "Pendents de Gol Average Directe segons resultat J35", "taronja");
+        setAuxMsg(2, "Pendents de Gol Average Directe segons resultat J35", "taronja");
+
+      } else if (aboveIdx === 2) {
+        document.getElementById("total-0").className = "total-num descens";
+        setAuxMsg(0, "Descens per desempat (Gol Average Directe)", "vermell");
+      }
+    }
+  }
+
+  function esborrarTot() {
+    sel = TEAMS.map(function() { return JORNADES.map(function() { return null; }); });
+    updateAll();
+  }
+
+  buildTable();
+</script>
+</body>
+</html>
