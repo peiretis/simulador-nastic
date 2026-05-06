@@ -892,16 +892,16 @@
            El resultat de la J36 (Tarazona-Nàstic) determina el GA Directe. */
         if (sel[1][1] === 1 && sel[2][1] === 1) {
           /* J36 empat → GA Directe favorable al Nàstic */
-          applyBoth(1, "Permanència per Gol Avg Directe: 2-1 J8 + Empat J36", "verd", false);
-          applyBoth(2, "Descens per Gol Avg Directe: 2-1 J8 + Empat J36", "vermell", true);
+          applyBoth(1, "Permanència per Gol Avg Directe\n2-1 J8 + Empat J36", "verd", false);
+          applyBoth(2, "Descens per Gol Avg Directe\n2-1 J8 + Empat J36", "vermell", true);
         } else if (sel[1][1] === 3 && sel[2][1] === 0) {
           /* J36 victòria Nàstic → GA Directe favorable al Nàstic */
-          applyBoth(1, "Permanència per Gol Avg Directe: 2-1 J8 + victòria J36", "verd", false);
-          applyBoth(2, "Descens per Gol Avg Directe: 2-1 J8 + derrota J36", "vermell", true);
+          applyBoth(1, "Permanència per Gol Avg Directe\n2-1 J8 + victòria J36", "verd", false);
+          applyBoth(2, "Descens per Gol Avg Directe\n2-1 J8 + derrota J36", "vermell", true);
         } else if (sel[1][1] === 0 && sel[2][1] === 3) {
           /* J36 victòria Tarazona → pendent del marcador exacte */
-          applyBoth(1, "Segons J36 es decidirà per Gol Avg DIRECTE o GLOBAL", "taronja", false);
-          applyBoth(2, "Segons J36 es decidirà per Gol Avg DIRECTE o GLOBAL", "taronja", false);
+          applyBoth(1, "Segons J36 es decidirà per\nGol Avg DIRECTE o GLOBAL", "taronja", false);
+          applyBoth(2, "Segons J36 es decidirà per\nGol Avg DIRECTE o GLOBAL", "taronja", false);
         } else {
           applyBoth(1, "Pendents de Gol Avg Directe segons J36", "taronja", false);
           applyBoth(2, "Pendents de Gol Avg Directe segons J36", "taronja", false);
