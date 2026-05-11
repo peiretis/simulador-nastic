@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de descens nastiquer 2025-2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    background: #ffffff;
+    padding: 32px 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 4px;
+  }
+
+  .subtitol {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    color: #666;
+    margin-bottom: 16px;
+  }
+
+  .page-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .content-wrap {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .toolbar {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-esborrar {
+    padding: 6px 16px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #555;
+    background: #ffd1d1;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .btn-esborrar:hover { background: #f0f0f0; border-color: #999; color: #333; }
+  .btn-esborrar:active { background: #e4e4e4; }
+
+  /* ═══════════════════════════════════════════════════
+     VISTA ESCRIPTORI
+     ═══════════════════════════════════════════════════ */
+
+  .desktop-view {
+    display: block;
+  }
+
+  table.calc {
+    border-collapse: collapse;
+    width: auto;
+    min-width: 1100px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    font-family: Arial, sans-serif;
+  }
+
+  table.calc th, table.calc td {
+    border: 1px solid #bbb;
+    padding: 9px 12px;
+    vertical-align: middle;
+  }
+
+  .th-empty { background: #e8e8e8; width: 52px; }
+
+  .th-team {
+    background: #e8e8e8;
+    text-align: center;
+    min-width: 190px;
+  }
+
+  .th-team .team-label { font-weight: bold; font-size: 14px; color: #111; }
+  .th-team .team-label.nastic { color: #b00000; }
+  .th-team .team-pts { font-weight: normal; color: #555; font-size: 12px; margin-top: 2px; }
+
+  .th-pts-col {
+    background: #e8e8e8;
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+    width: 40px;
+    color: #444;
+  }
+
+  .td-jornada {
+    background: #e8e8e8;
+    font-weight: bold;
+    text-align: center;
+    font-size: 13px;
+    color: #333;
+    width: 44px;
+  }
+
+  .td-rival { padding: 7px 10px; min-width: 190px; }
+
+  .rival-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+  }
+
+  .rival-name { flex: 1; font-size: 13px; color: #333; }
+
+  .result-text {
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .result-text.v { color: #1e6b1e; }
+  .result-text.e { color: #b08000; }
+  .result-text.d { color: #a81c1c; }
+
+  .btns { display: flex; gap: 4px; flex-shrink: 0; }
+
+  .btn-res {
+    width: 27px;
+    height: 27px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #f5f5f5;
+    color: #555;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+    line-height: 1;
+  }
+
+  .btn-res:hover:not(.active-v):not(.active-e):not(.active-d) { background: #e0e0e0; }
+  .btn-res.active-v { background: #1e6b1e; color: #fff; border-color: #1e6b1e; }
+  .btn-res.active-e { background: #b08000; color: #fff; border-color: #b08000; }
+  .btn-res.active-d { background: #a81c1c; color: #fff; border-color: #a81c1c; }
+
+  .td-pts {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    width: 40px;
+    color: #ccc;
+  }
+
+  .td-pts.v { color: #1e6b1e; }
+  .td-pts.e { color: #b08000; }
+  .td-pts.d { color: #a81c1c; }
+
+  /* Fila de jornada ja jugada (fixada) - ESCRIPTORI */
+  .tr-fixed td {
+    background: #f7f7f7;
+    padding: 2px 12px;
+  }
+
+  .tr-fixed .td-jornada {
+    background: #dcdcdc;
+  }
+
+  .tr-total td {
+    background: #e8e8e8;
+    border-top: 2px solid #999;
+  }
+
+  .td-total-label {
+    text-align: right;
+    font-size: 14px;
+    color: #666;
+    font-style: normal;
+    padding-right: 10px;
+    vertical-align: middle;
+  }
+
+  .td-total-num {
+    text-align: center;
+    width: 40px;
+    vertical-align: middle;
+  }
+
+  .total-num {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+    display: block;
+  }
+
+  .total-num.descens { color: #a81c1c; }
+
+  .aux-msg {
+    display: none;
+    font-size: 12px;
+    font-weight: bold;
+    font-style: normal;
+    margin-top: 4px;
+  }
+
+  .aux-msg.vermell { color: #a81c1c; }
+  .aux-msg.taronja { color: #c06000; }
+  .aux-msg.verd { color: #222; }
+
+  /* ═══════════════════════════════════════════════════
+     VISTA MÒBIL (blocs apilats verticalment)
+     ═══════════════════════════════════════════════════ */
+
+  .mobile-view {
+    display: none;
+  }
+
+  .mobile-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .mobile-card-header {
+    background: #e8e8e8;
+    padding: 5px 5px;
+    text-align: center;
+    border-bottom: 1px solid #999;
+  }
+
+  .mobile-card-header .m-team-label {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    color: #111;
+  }
+
+  .mobile-card-header .m-team-label.nastic { color: #b00000; }
+
+  .mobile-card-header .m-team-pts {
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-size: 0px;
+    color: #555;
+    margin-top: 0px;
+  }
+
+  table.mobile-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: Arial, sans-serif;
+  }
+
+  table.mobile-table td {
+    border: 1px solid #ccc;
+    border-left: none;
+    border-right: none;
+    padding: 4px 4px;
+    vertical-align: middle;
+  }
+
+  table.mobile-table .m-td-jornada {
+    background: #f0f0f0;
+    font-weight: bold;
+    font-size: 11px;
+    color: #444;
+    width: 20px;
+    text-align: center;
+    border-left: none;
+  }
+
+  table.mobile-table .m-td-rival {
+    font-size: 13px;
+    color: #333;
+  }
+
+  table.mobile-table .m-rival-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  table.mobile-table .m-rival-name {
+    flex: 1;
+    font-size: 13px;
+    color: #333;
+  }
+
+  table.mobile-table .m-result-text {
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  table.mobile-table .m-result-text.v { color: #1e6b1e; }
+  table.mobile-table .m-result-text.e { color: #b08000; }
+  table.mobile-table .m-result-text.d { color: #a81c1c; }
+
+  table.mobile-table .m-btns {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  table.mobile-table .m-btn-res {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #f5f5f5;
+    color: #555;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+    line-height: 1;
+  }
+
+  table.mobile-table .m-btn-res.active-v { background: #1e6b1e; color: #fff; border-color: #1e6b1e; }
+  table.mobile-table .m-btn-res.active-e { background: #b08000; color: #fff; border-color: #b08000; }
+  table.mobile-table .m-btn-res.active-d { background: #a81c1c; color: #fff; border-color: #a81c1c; }
+
+  table.mobile-table .m-td-pts {
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    width: 36px;
+    color: #ccc;
+  }
+
+  table.mobile-table .m-td-pts.v { color: #1e6b1e; }
+  table.mobile-table .m-td-pts.e { color: #b08000; }
+  table.mobile-table .m-td-pts.d { color: #a81c1c; }
+
+  /* Fila de jornada ja jugada (fixada) - MÒBIL */
+  table.mobile-table .m-tr-fixed td {
+    background: #f7f7f7;
+  }
+
+  table.mobile-table .m-tr-fixed .m-td-jornada {
+    background: #dcdcdc;
+  }
+
+  /* Fila total dins la taula mòbil */
+  table.mobile-table .m-tr-total td {
+    background: #e8e8e8;
+    border-top: 1px solid #999;
+  }
+
+  table.mobile-table .m-td-total-label {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+    text-align: right;
+    padding-right: 10px;
+    vertical-align: middle;
+  }
+
+  table.mobile-table .m-td-total-num {
+    text-align: center;
+    width: 36px;
+    vertical-align: middle;
+  }
+
+  table.mobile-table .m-total-num {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    color: #222;
+    display: block;
+  }
+
+  table.mobile-table .m-total-num.descens { color: #a81c1c; }
+
+  table.mobile-table .m-aux-msg {
+    display: none;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    font-style: normal;
+    margin-top: 3px;
+  }
+
+  table.mobile-table .m-aux-msg.vermell { color: #a81c1c; }
+  table.mobile-table .m-aux-msg.taronja { color: #c06000; }
+  table.mobile-table .m-aux-msg.verd { color: #222; }
+
+  /* ═══════════════════════════════════════════════════
+     TEXT INFORMATIU + TAULA LIGUILLA
+     ═══════════════════════════════════════════════════ */
+
+  .info-section {
+    margin-top: 22px;
+    font-family: Arial, sans-serif;
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+  }
+
+  .info-col-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .info-col-right {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Taula resultats Nàstic */
+  .resultats-title {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .resultats-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table.resultats {
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    background: #fff;
+    width: 100%;
+  }
+
+  table.resultats th {
+    background: #e8e8e8;
+    border: 1px solid #616161;
+    padding: 5px 8px;
+    text-align: center;
+    font-weight: bold;
+    color: #444;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  table.resultats th:nth-child(2) { text-align: left; }
+
+  table.resultats td {
+    border: 1px solid #616161;
+    padding: 5px 8px;
+    text-align: center;
+    color: #333;
+    white-space: nowrap;
+  }
+
+  table.resultats td:nth-child(2) { text-align: left; }
+
+  table.resultats tr:nth-child(odd) td { background: #fafafa; }
+
+  /* Fila Nàstic destacada */
+  table.resultats tr.fila-nastic td {
+    background: #e0e0e0;
+    font-weight: bold;
+  }
+
+  /* ── FORMAT INDIVIDUAL PER CEL·LA ──────────────────────
+     Cada cel·la té un ID: rc-EQUIP-COLUMNA
+     Modifica color, background, font-weight, font-style...
+     ────────────────────────────────────────────────────── */
+
+  /* Hércules (12) */
+  #rc-her-v1  { background: #ffffff; color: #e6a429; font-weight: bold; font-style: normal; }
+  #rc-her-v2  { background: #ffffff; color: #444444; font-weight: bold; font-style: normal; }
+  #rc-her-ga  { background: #ffffff; }
+
+  /* Real Murcia (13) */
+  #rc-mur-v1  { background: #ffffff; color: #a81c1c; font-weight: bold; font-style: normal; }
+  #rc-mur-v2  { background: #ffffff; color: #2da12d; font-weight: bold; font-style: normal; }
+  #rc-mur-ga  { background: #ffe4b3; color: #444444; font-weight: bold; font-style: normal; }
+
+  /* Juventud Torremolinos (14) */
+  #rc-tor-v1  { background: #ffffff; color: #a81c1c; font-weight: bold; font-style: normal; }
+  #rc-tor-v2  { background: #ffffff; color: #2da12d; font-weight: bold; font-style: normal; }
+  #rc-tor-ga  { background: #ffe4b3; color: #444444; font-weight: bold; font-style: normal; }
+
+  /* SD Tarazona (16) */
+  #rc-tar-v1  { background: #ffffff; color: #2da12d; font-weight: bold; font-style: normal; }
+  #rc-tar-v2  { background: #ffffff; color: #444444; font-weight: bold; font-style: normal; }
+  #rc-tar-ga  { background: #ffe4b3; color: #444444; font-weight: bold; font-style: normal; }
+
+  /* Betis Deportivo (17) */
+  #rc-bet-v1  { background: #ffffff; color: #e6a429; font-weight: bold; font-style: normal; }
+  #rc-bet-v2  { background: #ffffff; color: #e6a429; font-weight: bold; font-style: normal; }
+  #rc-bet-ga  { background: #ffe4b3; color: #444444; font-weight: bold; font-style: normal; }
+
+  /* Marbella FC (18) */
+  #rc-mar-v1  { background: #ffffff; color: #2da12d; font-weight: bold; font-style: normal; }
+  #rc-mar-v2  { background: #ffffff; color: #a81c1c; font-weight: bold; font-style: normal; }
+  #rc-mar-ga  { background: #ffb0b0; color: #444444; font-weight: bold; font-style: normal; }
+
+  /* At. Sanluqueño (19) */
+  #rc-san-v1  { background: #ffffff; color: #a81c1c; font-weight: bold; font-style: normal; }
+  #rc-san-v2  { background: #ffffff; color: #a81c1c; font-weight: bold; font-style: normal; }
+  #rc-san-ga  { background: #ffb0b0; color: #444444; font-weight: bold; font-style: normal; }
+
+  /* Sevilla At. (20) */
+  #rc-sev-v1  { background: #ffffff; color: #2da12d; font-weight: bold; font-style: normal; }
+  #rc-sev-v2  { background: #ffffff; color: #2da12d; font-weight: bold; font-style: normal; }
+  #rc-sev-ga  { background: #cbedc0; color: #444444; font-weight: bold; font-style: normal; }
+
+  .info-text {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .liguilla-title {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 18px;
+    margin-bottom: 8px;
+  }
+
+  .liguilla-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table.liguilla {
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    background: #fff;
+  }
+
+  table.liguilla th {
+    background: #e8e8e8;
+    border: 1px solid #bbb;
+    padding: 5px 10px;
+    text-align: center;
+    font-weight: bold;
+    color: #444;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  table.liguilla th:first-child { text-align: left; min-width: 150px; }
+
+  table.liguilla td {
+    border: 1px solid #bbb;
+    padding: 5px 10px;
+    text-align: center;
+    color: #333;
+    white-space: nowrap;
+  }
+
+  table.liguilla td:first-child { text-align: left; font-weight: bold; }
+
+  table.liguilla tr:nth-child(odd) td { background: #fafafa; }
+
+  /* ═══════════════════════════════════════════════════
+     MEDIA QUERY MÒBIL
+     ═══════════════════════════════════════════════════ */
+
+  @media (max-width: 768px) {
+    body { padding: 16px 12px; }
+    h1 { font-size: 16px; }
+    .subtitol { font-size: 12px; margin-bottom: 12px; }
+
+    .desktop-view { display: none; }
+    .mobile-view  { display: block; }
+
+    .info-text { font-size: 11px; }
+
+    .info-section { flex-direction: column; gap: 16px; }
+
+    table.resultats { font-size: 11px; }
+    table.resultats th { font-size: 10px; padding: 4px 6px; }
+    table.resultats td { padding: 4px 6px; }
+    table.liguilla { font-size: 11px; }
+    table.liguilla th { font-size: 10px; padding: 4px 7px; }
+    table.liguilla td { padding: 4px 7px; }
+    table.liguilla th:first-child { min-width: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Simulador de descens nastiquer 2025-2026</h1>
+<p class="subtitol">Vols pronosticar si jugarem a 2a RFEF? Omple tots els resultats per obtenir els possibles escenaris, fes captura i comparteix!</p>
+
+<div class="page-wrap">
+<div class="content-wrap">
+
+<div class="toolbar">
+  <button class="btn-esborrar" onclick="esborrarTot()">Esborrar</button>
+</div>
+
+<!-- ════ VISTA ESCRIPTORI (targetes apilades) ════ -->
+<div class="desktop-view" id="desktop-cards"></div>
+
+<!-- ════ VISTA MÒBIL ════ -->
+<div class="mobile-view" id="mobile-view"></div>
+
+<!-- ════ INFO I LIGUILLA + TAULA RESULTATS ════ -->
+<div class="info-section">
+
+  <div class="info-col-left">
+    <div class="info-text">
+      Criteris en cas d'empat a punts en la classificació final, entre dos equips:<br>
+      1) Gol average dels enfrontaments directes entre els dos equips<br>
+      2) Gol average global a la lliga<br>
+      3) Major nombre gols a favor<br>
+      <br>
+      Criteris en cas d'empat a punts en la classificació final, entre tres equips o més:<br>
+      1) Liguilla entre els equips
+    </div>
+
+    <div class="liguilla-title">Liguilla - Estat actual a J37</div>
+    <div class="liguilla-scroll">
+    <table class="liguilla">
+      <thead>
+        <tr><th>Equip</th><th>PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Juv. Torremolinos</td><td>7</td><td>4</td><td>2</td><td>1</td><td>1</td><td>4</td><td>3</td><td>1</td></tr>
+        <tr><td>Nàstic Tarragona</td><td>6</td><td>4</td><td>2</td><td>0</td><td>2</td><td>4</td><td>5</td><td>-1</td></tr>
+        <tr><td>SD Tarazona</td><td>4</td><td>4</td><td>1</td><td>1</td><td>2</td><td>2</td><td>4</td><td>0</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="info-col-right">
+    <div class="resultats-title">J36 - Resultats del Nàstic contra...</div>
+    <div class="resultats-scroll">
+    <table class="resultats">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+          <th>Punts</th>
+          <th>1a volta</th>
+          <th>2a volta</th>
+          <th>Gol average</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>12</td>
+          <td>Hércules</td>
+          <td>47</td>
+          <td id="rc-her-v1">2-2</td>
+          <td id="rc-her-v2">J38 Fora</td>
+          <td id="rc-her-ga"></td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>Real Murcia</td>
+          <td>46</td>
+          <td id="rc-mur-v1">2-3</td>
+          <td id="rc-mur-v2">2-1</td>
+          <td id="rc-mur-ga">Empat 4-4</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>Juventud Torremolinos</td>
+          <td>43</td>
+          <td id="rc-tor-v1">2-0</td>
+          <td id="rc-tor-v2">2-0</td>
+          <td id="rc-tor-ga">Empat 2-2</td>
+        </tr>
+        <tr class="fila-nastic">
+          <td>15</td>
+          <td>Gimnàstic Tarragona</td>
+          <td>43</td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>SD Tarazona</td>
+          <td>42</td>
+          <td id="rc-tar-v1">2-1</td>
+          <td id="rc-tar-v2">2-0</td>
+          <td id="rc-tar-ga">Perdut 2-3</td>
+        </tr>
+        <tr>
+          <td>17</td>
+          <td>Betis Deportivo</td>
+          <td>38</td>
+          <td id="rc-bet-v1">2-2</td>
+          <td id="rc-bet-v2">2-2</td>
+          <td id="rc-bet-ga">Empat 4-4</td>
+        </tr>
+        <tr>
+          <td>18</td>
+          <td>Marbella FC</td>
+          <td>31</td>
+          <td id="rc-mar-v1">1-0</td>
+          <td id="rc-mar-v2">2-0</td>
+          <td id="rc-mar-ga">Perdut 1-2</td>
+        </tr>
+        <tr>
+          <td>19</td>
+          <td>At. Sanluqueño</td>
+          <td>29</td>
+          <td id="rc-san-v1">1-3</td>
+          <td id="rc-san-v2">1-0</td>
+          <td id="rc-san-ga">Perdut 1-4</td>
+        </tr>
+        <tr>
+          <td>20</td>
+          <td>Sevilla At.</td>
+          <td>26</td>
+          <td id="rc-sev-v1">1-2</td>
+          <td id="rc-sev-v2">2-1</td>
+          <td id="rc-sev-ga">Guanyat 4-2</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+  var TEAMS = [
+    { pts: 46, pos: "13è", name: "Juv. Torremolinos",  cls: "" },
+    { pts: 46, pos: "14è", name: "Real Murcia",         cls: "" },
+    { pts: 45, pos: "15è", name: "SD Tarazona",         cls: "" },
+    { pts: 43, pos: "16è", name: "Nàstic Tarragona",    cls: "nastic" },
+    { pts: 41, pos: "17è", name: "Betis Dep.",           cls: "" }
+  ];
+
+  var JORNADES = [
+    { j: "J37", rivals: ["Real Murcia (Casa)", "Torremolinos (Fora)", "Betis Dep. (Fora)", "CE Europa (Casa)", "Tarazona (Casa)"] },
+    { j: "J38", rivals: ["Antequera CF (Fora)", "Eldense (Casa)", "CE Sabadell (Casa)", "Hércules (Fora)", "Cartagena (Fora)"] }
+  ];
+
+  var BTNS = [
+    { val: 3, label: "V", btnCls: "active-v", ptsCls: "v" },
+    { val: 1, label: "E", btnCls: "active-e", ptsCls: "e" },
+    { val: 0, label: "D", btnCls: "active-d", ptsCls: "d" }
+  ];
+
+  var sel = TEAMS.map(function() { return JORNADES.map(function() { return null; }); });
+
+  /* ── Funció genèrica per construir una targeta ─────────── */
+  function buildCard(container, team, ti, prefix) {
+    var card = document.createElement("div");
+    card.className = (prefix === "d-") ? "desktop-card" : "mobile-card";
+
+    /* Capçalera */
+    var header = document.createElement("div");
+    header.className = (prefix === "d-") ? "desktop-card-header" : "mobile-card-header";
+
+    var label = document.createElement("div");
+    label.className = ((prefix === "d-") ? "d-team-label" : "m-team-label") + (team.cls ? " " + team.cls : "");
+    label.textContent = team.pos + " " + team.name;
+    header.appendChild(label);
+
+    var ptsLabel = document.createElement("div");
+    ptsLabel.className = (prefix === "d-") ? "d-team-pts" : "m-team-pts";
+    ptsLabel.textContent = team.pts + " pts";
+    header.appendChild(ptsLabel);
+
+    card.appendChild(header);
+
+    /* Taula de jornades */
+    var tbl = document.createElement("table");
+    tbl.className = (prefix === "d-") ? "desktop-table" : "mobile-table";
+
+    JORNADES.forEach(function(jornada, ji) {
+      var tr = document.createElement("tr");
+
+      var tdJ = document.createElement("td");
+      tdJ.className = (prefix === "d-") ? "d-td-jornada" : "m-td-jornada";
+      tdJ.textContent = jornada.j;
+      tr.appendChild(tdJ);
+
+      var tdR = document.createElement("td");
+      tdR.className = (prefix === "d-") ? "d-td-rival" : "m-td-rival";
+      var inner = document.createElement("div");
+      inner.className = (prefix === "d-") ? "d-rival-inner" : "m-rival-inner";
+      var rn = document.createElement("span");
+      rn.className = (prefix === "d-") ? "d-rival-name" : "m-rival-name";
+      rn.textContent = jornada.rivals[ti];
+      inner.appendChild(rn);
+
+      var bd = document.createElement("div");
+      bd.className = (prefix === "d-") ? "d-btns" : "m-btns";
+      BTNS.forEach(function(b) {
+        var btn = document.createElement("button");
+        btn.className = (prefix === "d-") ? "d-btn-res" : "m-btn-res";
+        btn.textContent = b.label;
+        btn.addEventListener("click", function() {
+          sel[ti][ji] = (sel[ti][ji] === b.val) ? null : b.val;
+          updateAll();
+        });
+        bd.appendChild(btn);
+      });
+      inner.appendChild(bd);
+      tdR.appendChild(inner);
+      tr.appendChild(tdR);
+
+      var tdP = document.createElement("td");
+      tdP.className = (prefix === "d-") ? "d-td-pts" : "m-td-pts";
+      tdP.id = prefix + "pts-" + ti + "-" + ji;
+      tdP.textContent = "\u00b7";
+      tr.appendChild(tdP);
+
+      tbl.appendChild(tr);
+    });
+
+    card.appendChild(tbl);
+
+    /* Fila total */
+    var trTotal = document.createElement("tr");
+    trTotal.className = (prefix === "d-") ? "d-tr-total" : "m-tr-total";
+
+    var tdJEmpty = document.createElement("td");
+    tdJEmpty.className = (prefix === "d-") ? "d-td-jornada" : "m-td-jornada";
+    tdJEmpty.style.borderBottom = "none";
+    trTotal.appendChild(tdJEmpty);
+
+    var tdLabel = document.createElement("td");
+    tdLabel.className = (prefix === "d-") ? "d-td-total-label" : "m-td-total-label";
+    tdLabel.textContent = "Puntuació final";
+    var auxMsg = document.createElement("div");
+    auxMsg.className = (prefix === "d-") ? "d-aux-msg" : "m-aux-msg";
+    auxMsg.id = prefix + "aux-msg-" + ti;
+    tdLabel.appendChild(auxMsg);
+    trTotal.appendChild(tdLabel);
+
+    var tdNum = document.createElement("td");
+    tdNum.className = (prefix === "d-") ? "d-td-total-num" : "m-td-total-num";
+    var totalSpan = document.createElement("span");
+    totalSpan.className = (prefix === "d-") ? "d-total-num" : "m-total-num";
+    totalSpan.id = prefix + "total-" + ti;
+    totalSpan.textContent = team.pts;
+    tdNum.appendChild(totalSpan);
+    trTotal.appendChild(tdNum);
+
+    tbl.appendChild(trTotal);
+    container.appendChild(card);
+  }
+
+  function buildDesktop() {
+    var container = document.getElementById("desktop-cards");
+    TEAMS.forEach(function(team, ti) { buildCard(container, team, ti, "d-"); });
+  }
+
+  function buildMobile() {
+    var container = document.getElementById("mobile-view");
+    TEAMS.forEach(function(team, ti) { buildCard(container, team, ti, "m-"); });
+  }
+
+  /* ── HELPERS ─────────────────────────────────────────────── */
+  function allFilled() {
+    for (var ti = 0; ti < TEAMS.length; ti++)
+      for (var ji = 0; ji < JORNADES.length; ji++)
+        if (sel[ti][ji] === null) return false;
+    return true;
+  }
+
+  function setAux(prefix, ti, text, color) {
+    var el = document.getElementById(prefix + "aux-msg-" + ti);
+    if (!el) return;
+    el.textContent = text;
+    el.className = el.className.split(" ")[0] + " " + color;
+    el.style.display = "block";
+  }
+
+  function clearAux(prefix, ti) {
+    var el = document.getElementById(prefix + "aux-msg-" + ti);
+    if (!el) return;
+    el.textContent = "";
+    el.className = el.className.split(" ")[0];
+    el.style.display = "none";
+  }
+
+  /* ── Funció genèrica per actualitzar una vista ─────────── */
+  function updateView(containerId, prefix, btnClass) {
+    var container = document.getElementById(containerId);
+    TEAMS.forEach(function(team, ti) {
+      var card = container.children[ti];
+      var rows = card.querySelector("table").rows;
+      JORNADES.forEach(function(jornada, ji) {
+        var v = sel[ti][ji];
+        rows[ji].querySelectorAll("." + btnClass).forEach(function(btn, bi) {
+          btn.classList.remove("active-v", "active-e", "active-d");
+          if (v !== null && BTNS[bi].val === v) btn.classList.add(BTNS[bi].btnCls);
+        });
+        var ptsEl = document.getElementById(prefix + "pts-" + ti + "-" + ji);
+        var ptsCls = (prefix === "d-") ? "d-td-pts" : "m-td-pts";
+        if (v === null) { ptsEl.textContent = "\u00b7"; ptsEl.className = ptsCls; }
+        else { var b = BTNS.find(function(b){return b.val===v;}); ptsEl.textContent = v; ptsEl.className = ptsCls + " " + b.ptsCls; }
+      });
+    });
+  }
+
+  function updateAll() {
+    updateView("desktop-cards", "d-", "d-btn-res");
+    updateView("mobile-view", "m-", "m-btn-res");
+
+    /* Totals */
+    var totals = TEAMS.map(function(team, ti) {
+      return team.pts + sel[ti].reduce(function(acc, v) { return acc + (v !== null ? v : 0); }, 0);
+    });
+
+    /* Reset ambdues vistes */
+    TEAMS.forEach(function(team, ti) {
+      ["d-", "m-"].forEach(function(prefix) {
+        var el = document.getElementById(prefix + "total-" + ti);
+        if (el) { el.textContent = totals[ti]; el.className = el.className.replace(" descens",""); }
+        clearAux(prefix, ti);
+      });
+    });
+  }
+
+  function esborrarTot() {
+    sel = TEAMS.map(function() { return JORNADES.map(function() { return null; }); });
+    updateAll();
+  }
+
+  buildDesktop();
+  buildMobile();
+  updateAll();
+</script>
+</body>
+</html>
